@@ -4,13 +4,7 @@
 import type PhotoSwipe from 'photoswipe'
 import { i18n } from '@/locales'
 import { theToast } from '@/utils/toast'
-import {
-  extractMotionVideo,
-  originalFileName,
-  originalDownloadURL,
-  downloadOriginalURL,
-  saveOriginal,
-} from '@/utils/motionPhoto'
+import { extractMotionVideo, originalFileName, originalDownloadURL } from '@/utils/motionPhoto'
 import { bindPressMotion } from '@/utils/pressMotion'
 
 export function installOriginalPhotoControls(
@@ -21,11 +15,17 @@ export function installOriginalPhotoControls(
   let controller: AbortController | null = null
   let original: Promise<Blob> | null = null
   let originalBlob: Blob | null = null
+  let originalBlobURL = ''
+  let shareFile: File | null = null
   let motionReady: Promise<void> = Promise.resolve()
   let video: HTMLVideoElement | null = null
   let videoURL = ''
   let motionButton: HTMLElement | null = null
-  let downloadButton: HTMLElement | null = null
+  let downloadButton: HTMLAnchorElement | null = null
+  let saveHelp: HTMLElement | null = null
+  let openOriginal: HTMLAnchorElement | null = null
+  let shareButton: HTMLButtonElement | null = null
+  let saveHint: HTMLElement | null = null
   let generation = 0
   let playing = false
   let initialized = false
@@ -52,7 +52,42 @@ export function installOriginalPhotoControls(
     controller = null
     original = null
     originalBlob = null
+    shareFile = null
+    if (originalBlobURL) URL.revokeObjectURL(originalBlobURL)
+    originalBlobURL = ''
+    if (saveHelp) saveHelp.style.display = 'none'
     stopVideo()
+  }
+  const updateDownloadControls = () => {
+    const item = items[pswp.currIndex]
+    if (!item || !downloadButton) return
+    const fileName = originalFileName(item.src, item.name)
+    const nativeURL = originalDownloadURL(item.src, fileName)
+    // Keep a real link ready before the tap. Do not simulate a second click,
+    // wait for fetch, or require a popup for a same-origin attachment download.
+    downloadButton.href = nativeURL || originalBlobURL || item.src
+    downloadButton.download = fileName
+    downloadButton.target = nativeURL || originalBlobURL ? '_self' : '_blank'
+    if (openOriginal) openOriginal.href = item.src
+    if (saveHint) saveHint.textContent = t('imageGallery.originalSaveHint')
+    shareFile = originalBlob
+      ? new File([originalBlob], fileName, {
+          type: originalBlob.type || 'application/octet-stream',
+        })
+      : null
+    if (shareButton) {
+      shareButton.hidden = true
+      try {
+        shareButton.hidden = !(
+          shareFile &&
+          typeof navigator.share === 'function' &&
+          typeof navigator.canShare === 'function' &&
+          navigator.canShare({ files: [shareFile] })
+        )
+      } catch {
+        // Some embedded browsers expose a file-sharing API they cannot use.
+      }
+    }
   }
   const getOriginal = () => {
     if (!original) {
@@ -77,10 +112,17 @@ export function installOriginalPhotoControls(
 
   const prepareMotion = async () => {
     clean()
+    updateDownloadControls()
     const current = generation
     if (motionButton) motionButton.style.display = 'none'
     try {
-      const movie = await extractMotionVideo(await getOriginal())
+      const blob = await getOriginal()
+      if (current !== generation) return
+      const item = items[pswp.currIndex]
+      if (item && !originalDownloadURL(item.src, originalFileName(item.src, item.name)))
+        originalBlobURL = URL.createObjectURL(blob)
+      updateDownloadControls()
+      const movie = await extractMotionVideo(blob)
       if (current !== generation || !movie || !motionButton) return
       videoURL = URL.createObjectURL(movie)
       motionButton.style.display = ''
@@ -95,41 +137,69 @@ export function installOriginalPhotoControls(
       name: 'download-original',
       order: 8,
       isButton: true,
+      tagName: 'a',
       title: t('imageGallery.downloadOriginal'),
       onInit: (element) => {
-        downloadButton = element
+        downloadButton = element as HTMLAnchorElement
         element.textContent = t('imageGallery.downloadOriginal')
-        element.style.cssText = 'width:auto;padding:0 12px;font-size:14px;color:white'
+        element.style.cssText =
+          'width:auto;padding:0 12px;font-size:14px;color:white;display:flex;align-items:center;text-decoration:none'
+        element.setAttribute('rel', 'noopener')
+        updateDownloadControls()
       },
       onClick: () => {
-        const item = items[pswp.currIndex]
-        const current = generation
-        if (!item) return
-        const fileName = originalFileName(item.src, item.name)
-        const nativeURL = originalDownloadURL(item.src, fileName)
-        if (nativeURL) {
-          // Trigger a server attachment synchronously in the user's tap handler.
-          // Mobile browsers must not depend on a delayed synthetic Blob click.
-          downloadOriginalURL(nativeURL, fileName)
-          return
-        }
-        if (originalBlob) {
-          void saveOriginal(originalBlob, fileName).catch(() =>
-            theToast.error(t('imageGallery.originalDownloadFailed')),
-          )
-          return
-        }
-        if (downloadButton) downloadButton.textContent = t('imageGallery.downloadingOriginal')
-        void getOriginal()
-          .then((blob) => saveOriginal(blob, fileName))
-          .catch((err) => {
-            if ((err as Error).name !== 'AbortError')
-              theToast.error(t('imageGallery.originalDownloadFailed'))
+        // Browsers do not report whether the user actually saved a download.
+        // Leave a visible manual route instead of falsely reporting success.
+        if (saveHelp) saveHelp.style.display = ''
+      },
+    })
+    pswp.ui?.registerElement({
+      name: 'original-save-help',
+      appendTo: 'root',
+      onInit: (element) => {
+        saveHelp = element
+        element.setAttribute('role', 'region')
+        element.setAttribute('aria-label', t('imageGallery.downloadOriginal'))
+        element.style.cssText =
+          'position:absolute;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));max-width:480px;margin:0 auto;padding:12px;box-sizing:border-box;border-radius:10px;background:rgba(20,20,20,.96);color:white;font-size:14px;line-height:1.5;z-index:20;pointer-events:auto;display:none'
+        element.addEventListener('pointerdown', (event) => event.stopPropagation())
+        element.addEventListener('click', (event) => event.stopPropagation())
+        saveHint = document.createElement('p')
+        saveHint.setAttribute('role', 'status')
+        saveHint.style.cssText = 'margin:0 0 10px'
+        const actions = document.createElement('div')
+        actions.style.cssText = 'display:flex;flex-wrap:wrap;align-items:center;gap:10px'
+        const actionStyle =
+          'font:inherit;color:white;padding:8px 10px;border:1px solid #777;border-radius:6px;background:transparent;text-decoration:none;cursor:pointer'
+        openOriginal = document.createElement('a')
+        openOriginal.textContent = t('imageGallery.openOriginal')
+        openOriginal.target = '_blank'
+        openOriginal.rel = 'noopener'
+        openOriginal.style.cssText = actionStyle
+        shareButton = document.createElement('button')
+        shareButton.type = 'button'
+        shareButton.textContent = t('imageGallery.shareOriginal')
+        shareButton.style.cssText = actionStyle
+        shareButton.hidden = true
+        shareButton.onclick = () => {
+          if (!shareFile || typeof navigator.share !== 'function') return
+          const current = generation
+          // The file is prepared in advance: sharing must start in this tap.
+          void navigator.share({ files: [shareFile] }).catch((error: unknown) => {
+            if ((error as Error).name !== 'AbortError' && current === generation && saveHint)
+              saveHint.textContent = t('imageGallery.originalShareFailed')
           })
-          .finally(() => {
-            if (downloadButton && current === generation)
-              downloadButton.textContent = t('imageGallery.downloadOriginal')
-          })
+        }
+        const close = document.createElement('button')
+        close.type = 'button'
+        close.textContent = t('imageGallery.closeSaveHelp')
+        close.style.cssText = actionStyle + ';margin-left:auto'
+        close.onclick = () => {
+          element.style.display = 'none'
+        }
+        actions.append(openOriginal, shareButton, close)
+        element.append(saveHint, actions)
+        updateDownloadControls()
       },
     })
     pswp.ui?.registerElement({

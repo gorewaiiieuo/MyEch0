@@ -11,7 +11,7 @@ const out = path.join(__dirname, '../test-output/media')
 
 async function main() {
   await fs.mkdir(out, { recursive: true })
-  const browser = await chromium.launch({ channel: 'msedge', headless: true })
+  const browser = await chromium.launch({ channel: 'msedge', headless: true, args: ['--host-resolver-rules=MAP ech0-test.invalid 127.0.0.1', '--no-proxy-server'] })
   const context = await browser.newContext({ locale: 'zh-CN', viewport: { width: 1280, height: 960 }, acceptDownloads: true })
   const page = await context.newPage()
   const errors = []
@@ -63,7 +63,7 @@ async function main() {
     await page.getByRole('button', { name: '查看静态图' }).click()
     assert.equal(await page.locator('.pswp video').count(), 0, 'still toggle removes video')
     const downloadEvent = page.waitForEvent('download')
-    await page.getByRole('button', { name: '下载原图' }).click()
+    await page.getByRole('link', { name: '下载原图', exact: true }).click()
     const download = await downloadEvent
     assert.equal(download.suggestedFilename(), 'test-original-motion.jpg', 'original filename is retained')
     const downloadedPath = path.join(out, 'test-downloaded-original.jpg')
@@ -74,7 +74,9 @@ async function main() {
     const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, acceptDownloads: true, locale: 'zh-CN' })
     const mobilePage = await mobileContext.newPage()
     mobilePage.on('pageerror', (error) => errors.push(error.message))
-    await mobilePage.goto(base)
+    // A localhost-only test hides the lack of secure-context APIs on a NAS IP.
+    await mobilePage.goto('http://ech0-test.invalid:6279')
+    assert.equal(await mobilePage.evaluate(() => window.isSecureContext), false, 'NAS-style plain HTTP origin is not a secure context')
     const thumbnail = mobilePage.locator('.image-gallery-container button').first()
     await thumbnail.waitFor()
     const touch = await mobileContext.newCDPSession(mobilePage)
@@ -104,12 +106,32 @@ async function main() {
     await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     assert.equal(await mobilePage.locator('.pswp video').count(), 0, 'release restores still in fullscreen')
     const phoneDownload = mobilePage.waitForEvent('download')
-    await mobilePage.getByRole('button', { name: '下载原图' }).tap()
+    const nativeLink = mobilePage.getByRole('link', { name: '下载原图', exact: true })
+    assert.equal(await nativeLink.getAttribute('target'), '_self', 'native attachment must not require a popup')
+    let popups = 0
+    mobilePage.on('popup', () => popups++)
+    await nativeLink.tap()
     const phoneFile = await phoneDownload
     assert.equal(phoneFile.suggestedFilename(), 'test-original-motion.jpg')
     const phonePath = path.join(out, 'test-mobile-original.jpg')
     await phoneFile.saveAs(phonePath)
     assert.equal(hash(await fs.readFile(phonePath)), hash(motion), 'mobile native download keeps original bytes')
+    assert.equal(popups, 0, 'a phone download does not open a new tab')
+    const saveHelp = mobilePage.locator('.pswp__original-save-help')
+    await saveHelp.waitFor({ state: 'visible' })
+    assert.match(await saveHelp.textContent(), /下载列表/)
+    assert.equal(await mobilePage.getByRole('button', { name: '保存／分享原图', exact: true }).isVisible(), false, 'insecure NAS access still has a fallback without Web Share')
+    assert.equal(await mobilePage.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false, 'save help fits on a phone')
+    await mobilePage.screenshot({ path: path.join(out, 'mobile-original-save-help.png') })
+    const openedOriginal = mobilePage.waitForEvent('popup')
+    await saveHelp.getByRole('link', { name: '打开原图', exact: true }).tap()
+    const originalTab = await openedOriginal
+    await originalTab.waitForLoadState()
+    assert.match(originalTab.url(), /\/api\/files\//)
+    assert.equal(new URL(originalTab.url()).searchParams.has('download'), false, 'manual save opens the viewable original')
+    await originalTab.close()
+    await saveHelp.getByRole('button', { name: '收起提示', exact: true }).tap()
+    await saveHelp.waitFor({ state: 'hidden' })
     await mobileContext.close()
 
     const settingsResponse = await context.request.get(`${base}/api/settings`)
