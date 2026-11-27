@@ -14,6 +14,17 @@ if (-not $docker) {
 } else { $dockerPath = $docker.Source }
 $env:Path = (Split-Path -Parent $dockerPath) + ';' + $env:Path
 function Assert-LastExit([string]$Message) { if ($LASTEXITCODE -ne 0) { throw $Message } }
+function Publish-Image([string]$Image) {
+    for ($attempt = 1; $attempt -le 3; $attempt++) {
+        & $dockerPath push --platform linux/amd64 $Image
+        if ($LASTEXITCODE -eq 0) { return }
+        if ($attempt -lt 3) {
+            Write-Warning "Upload interrupted; retrying $Image ($attempt/3)."
+            Start-Sleep -Seconds 3
+        }
+    }
+    throw "Upload failed after three attempts: $Image"
+}
 Push-Location -LiteralPath $root
 try {
     $commit = (& git rev-parse HEAD).Trim()
@@ -49,12 +60,10 @@ try {
     } finally {
         & $dockerPath rm -f -v $testName 2>$null | Out-Null
     }
-    & $dockerPath push $versionImage
-    Assert-LastExit 'Version upload failed; latest was not changed.'
+    Publish-Image $versionImage
     & $dockerPath tag $versionImage "${Repository}:latest"
     Assert-LastExit 'Cannot tag latest.'
-    & $dockerPath push "${Repository}:latest"
-    Assert-LastExit 'Latest upload failed.'
+    Publish-Image "${Repository}:latest"
     Write-Host "Published $versionImage and ${Repository}:latest"
     Write-Host 'The NAS will detect latest on its next scheduled check.'
 } finally { Pop-Location }

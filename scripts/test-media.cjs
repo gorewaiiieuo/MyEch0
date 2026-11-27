@@ -79,6 +79,7 @@ async function main() {
     await thumbnail.waitFor()
     const touch = await mobileContext.newCDPSession(mobilePage)
     const hold = async (locator) => {
+      await locator.scrollIntoViewIfNeeded()
       const box = await locator.boundingBox()
       assert.ok(box, 'held image is visible')
       await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: box.x + box.width / 2, y: box.y + box.height / 2 }] })
