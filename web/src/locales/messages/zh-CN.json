@@ -35,6 +35,13 @@
     "none": "暂无"
   },
   "editor": {
+    "publicationTime": "发布时间",
+    "publicationTimeNow": "此刻",
+    "publicationTimeCustom": "选择时间",
+    "publicationTimeNowHint": "提交时使用当前时间。",
+    "publicationTimeCustomHint": "按本地时区 {timezone} 保存，内容会按此时间排列。",
+    "publicationTimeInvalid": "请选择有效的发布时间。",
+    "publicationTimeFuture": "补录时间不能晚于此刻。",
     "tagPickerTooltip": "选择标签",
     "tagPickerEmpty": "暂无可选标签",
     "tagPickerGoToManage": "前往标签管理",
@@ -61,7 +68,6 @@
     "imageSourceLocal": "本地存储",
     "imageSourceObject": "S3存储",
     "imageLayout": "选择布局方式：",
-    "imageSmartCompress": "智能压缩：",
     "currentUploadMode": "当前存储方式为",
     "uploadingSuffix": "，正在上传中...",
     "addMoreImages": "添加更多附件",
@@ -116,20 +122,16 @@
     "addLocation": "添加位置",
     "addTweet": "添加 X 推文",
     "locationShare": "位置分享",
-    "locationHint": "点击地图选点，或手动填入经纬度",
+    "locationHint": "使用高德地图：一键定位、搜索地名，或点击地图选点。手机获取当前位置需要 HTTPS 和定位权限。",
     "locationUseCurrent": "获取当前位置",
     "locationClear": "清空位置",
     "locationGeolocating": "定位中…",
-    "locationGeolocationDenied": "无法获取位置权限，请手动在地图上选点",
-    "locationGeolocationUnsupported": "当前浏览器不支持定位能力",
     "locationCoordInvalid": "经纬度超出有效范围",
     "locationPlaceholderInput": "这里是哪里？",
     "locationPlaceholderRequired": "请填写地名或地点描述",
     "locationLatPlaceholder": "纬度（-90 ~ 90）",
     "locationLngPlaceholder": "经度（-180 ~ 180）",
     "locationLookingUp": "正在识别地名…",
-    "locationStatusSelected": "已选位置",
-    "locationStatusChoose": "请在地图上选点",
     "locationZoomIn": "放大",
     "locationZoomOut": "缩小",
     "extLocation": "位置",
@@ -188,7 +190,14 @@
     "unorderedList": "无序列表",
     "codeBlock": "代码块",
     "addedLabel": "已添加：",
-    "noContentAdded": "尚未添加内容"
+    "noContentAdded": "尚未添加内容",
+    "originalPhotoHint": "原图上传：保留画质、拍摄信息和动态视频，不压缩、不转码。打开大图可播放动态或下载原图。",
+    "locationSetupRequired": "请先在管理面板 → 系统设置中填写高德地图 Web端（JS API）Key 和安全密钥。",
+    "locationServiceError": "定位或地图服务不可用。请检查高德 Key、安全密钥和域名配置；获取当前位置还需要 HTTPS、系统定位与浏览器权限。可改用地名搜索。修改 Key 后请刷新页面。",
+    "locationApproximateOnly": "只能获取大致城市，未设为当前位置。请开启精准定位，或搜索地名选择具体地点。",
+    "locationSearchPlaceholder": "输入地名，例如：中山港码头",
+    "locationSearch": "搜索地点",
+    "locationSearchEmpty": "没有找到地点，请加入城市名称后重试。"
   },
   "commentManager": {
     "tabSetting": "评论设置",
@@ -639,7 +648,12 @@
     "defaultLocale": "默认语言",
     "logoUploading": "服务器 Logo 上传中...",
     "logoUploadSuccess": "服务器 Logo 上传成功！",
-    "uploadFailed": "上传失败，请稍后再试"
+    "uploadFailed": "上传失败，请稍后再试",
+    "amapTitle": "国内定位与地图（高德）",
+    "amapKey": "高德 Web端（JS API）Key",
+    "amapSecurityCode": "JS API 安全密钥（securityJsCode）",
+    "amapHint": "在高德开放平台创建 Web端（JS API）应用，填写对应 Key 与安全密钥，配置访问域名后保存并刷新。这两项用于浏览器地图，勿填写 Web服务私密凭据。",
+    "amapApply": "前往高德申请 Key"
   },
   "storageSetting": {
     "title": "对象存储设置",
@@ -1115,7 +1129,14 @@
     "previewImage": "预览图片{index}",
     "prevImage": "上一张图片",
     "nextImage": "下一张图片",
-    "goToImage": "跳到第 {index} 张图片"
+    "goToImage": "跳到第 {index} 张图片",
+    "downloadOriginal": "下载原图",
+    "downloadingOriginal": "正在下载…",
+    "originalDownloadFailed": "原图下载失败。请检查网络；外链或对象存储图片需允许跨域读取。",
+    "playMotion": "播放动态",
+    "showStill": "查看静态图",
+    "motionCodecUnsupported": "浏览器无法播放这段动态视频，可下载原图后在支持的手机相册中查看。",
+    "stillUnsupported": "浏览器暂不支持此静态图格式，点击后可播放内嵌动态或下载原图。"
   },
   "audioPlayer": {
     "unsupported": "您的浏览器不支持音频播放",
@@ -1150,7 +1171,7 @@
     "github": "GitHub",
     "website": "网站",
     "location": "位置",
-    "locationOpenInMaps": "在 Google Maps 打开",
+    "locationOpenInMaps": "在高德地图打开",
     "jump": "跳转",
     "tweet": "推文",
     "tweetView": "在 X 上查看原帖"

@@ -11,6 +11,7 @@
         <TheTagsManager v-if="currentMode === Mode.TagManage" />
       </div>
 
+      <ThePublicationTime v-if="currentMode !== Mode.Panel && currentMode !== Mode.TagManage" />
       <TheEditorButtons />
       <TheEditorPreview />
     </div>
@@ -20,6 +21,7 @@
 <script setup lang="ts">
 import TheEditorPreview from './TheEditor/TheEditorPreview.vue'
 import TheEditorButtons from './TheEditor/TheEditorButtons.vue'
+import ThePublicationTime from './TheEditor/ThePublicationTime.vue'
 
 import { theToast } from '@/utils/toast'
 import { defineAsyncComponent, watch } from 'vue'

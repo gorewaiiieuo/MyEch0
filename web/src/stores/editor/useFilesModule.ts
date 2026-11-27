@@ -101,6 +101,7 @@ export function useFilesModule({ t }: FilesModuleDeps) {
     }
 
     addAttachment({
+      name: fileToAdd.value.name,
       id: fileToAdd.value.id,
       url: fileToAdd.value.url,
       storage_type: fileToAdd.value.storage_type,
@@ -125,6 +126,7 @@ export function useFilesModule({ t }: FilesModuleDeps) {
   const setFilesToAdd = (files: App.Api.Ech0.FileToAdd[]) => {
     resetAttachments(
       files.map((file) => ({
+        name: file.name,
         id: file.id,
         key: file.key,
         url: file.url,

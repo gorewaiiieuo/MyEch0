@@ -91,3 +91,15 @@ quality-report.md
 
 # wrangler local cache (see docs/assets/keynotes/wrangler.jsonc)
 .wrangler/
+
+# Local custom build products and NAS runtime state (never upload account data).
+/backend-artifacts/
+/test-output/
+/*.log
+/deploy/nas/.env
+/deploy/nas/backups/
+/deploy/nas/.update.lock
+/deploy/nas/update.failed
+/deploy/nas/update.log*
+/deploy/nas/.rollback.yml
+/deploy/nas/.cron.*

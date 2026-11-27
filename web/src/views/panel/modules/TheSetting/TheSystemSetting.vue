@@ -188,6 +188,33 @@
           class="w-full py-1!"
         />
       </div>
+      <div class="my-3 text-[var(--color-text-secondary)]">
+        <h2 class="font-semibold">{{ t('systemSetting.amapTitle') }}</h2>
+        <p class="text-xs text-[var(--color-text-muted)] mb-2">{{ t('systemSetting.amapHint') }}</p>
+        <label class="block mb-2">
+          {{ t('systemSetting.amapKey') }}
+          <BaseInput
+            v-model="SystemSetting.amap_key"
+            :disabled="!editMode"
+            :placeholder="t('systemSetting.amapKey')"
+          />
+        </label>
+        <label class="block">
+          {{ t('systemSetting.amapSecurityCode') }}
+          <BaseInput
+            v-model="SystemSetting.amap_security_code"
+            :disabled="!editMode"
+            :placeholder="t('systemSetting.amapSecurityCode')"
+          />
+        </label>
+        <a
+          href="https://console.amap.com/dev/key/app"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-sm underline"
+          >{{ t('systemSetting.amapApply') }}</a
+        >
+      </div>
       <div class="flex flex-row justify-start text-[var(--color-text-secondary)] gap-2 mb-1">
         <h2 class="font-semibold min-w-28 md:min-w-32 shrink-0 break-words leading-5">
           {{ t('systemSetting.customCss') }}:

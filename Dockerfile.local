@@ -1,0 +1,25 @@
+FROM node:26-alpine AS frontend
+WORKDIR /build/web
+RUN npm install -g pnpm@12.16.1
+COPY web/package.json web/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+COPY web/ ./
+RUN pnpm build
+
+FROM golang:1.27.4-alpine AS backend
+ARG BUILD_COMMIT=local
+RUN apk add --no-cache build-base sqlite-dev
+WORKDIR /build
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+COPY --from=frontend /build/template/dist ./template/dist
+ENV CGO_CFLAGS="-O2 -g -Du_int8_t=uint8_t -Du_int16_t=uint16_t -Du_int64_t=uint64_t"
+RUN CGO_ENABLED=1 GOAMD64=v1 go build -tags netgo -ldflags="-s -w -linkmode external -extldflags '-static' -X github.com/lin-snow/ech0/internal/version.Commit=${BUILD_COMMIT}" -o /out/ech0 ./cmd/ech0
+
+FROM sn0wl1n/ech0@sha256:ff35b895353e35f018dec0abccc6516a8b49ee4ce4d166067182a74a307fbb1b
+ARG BUILD_COMMIT=local
+LABEL org.opencontainers.image.source="https://github.com/gorewaiiieuo/MyEch0" \
+      org.opencontainers.image.licenses="AGPL-3.0-or-later" \
+      org.opencontainers.image.revision="${BUILD_COMMIT}"
+COPY --from=backend --chown=10001:10001 --chmod=0755 /out/ech0 /app/ech0

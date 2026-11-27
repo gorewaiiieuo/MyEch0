@@ -35,6 +35,13 @@
     "none": "N/A"
   },
   "editor": {
+    "publicationTime": "Publish time",
+    "publicationTimeNow": "Now",
+    "publicationTimeCustom": "Choose time",
+    "publicationTimeNowHint": "Use the current time when submitting.",
+    "publicationTimeCustomHint": "Saved in your local timezone {timezone}. Posts are ordered by this time.",
+    "publicationTimeInvalid": "Choose a valid publish time.",
+    "publicationTimeFuture": "The publish time cannot be in the future.",
     "tagPickerTooltip": "Pick tags",
     "tagPickerEmpty": "No tags available yet.",
     "tagPickerGoToManage": "Go to Tag Manager",
@@ -61,7 +68,6 @@
     "imageSourceLocal": "Local",
     "imageSourceObject": "S3",
     "imageLayout": "Select layout:",
-    "imageSmartCompress": "Smart compression:",
     "currentUploadMode": "Current storage method:",
     "uploadingSuffix": ", uploading...",
     "addMoreImages": "Add more attachments",
@@ -116,20 +122,16 @@
     "addLocation": "Add location",
     "addTweet": "Add X post",
     "locationShare": "Location",
-    "locationHint": "Click on the map or enter coordinates",
+    "locationHint": "Use AMap to locate, search a place or select a point. Mobile positioning requires HTTPS and location permission.",
     "locationUseCurrent": "Use current location",
     "locationClear": "Clear location",
     "locationGeolocating": "Locating…",
-    "locationGeolocationDenied": "Geolocation permission denied. Please pick a point on the map.",
-    "locationGeolocationUnsupported": "Geolocation is not supported in this browser",
     "locationCoordInvalid": "Coordinates out of valid range",
     "locationPlaceholderInput": "Where is this?",
     "locationPlaceholderRequired": "Please name the place",
     "locationLatPlaceholder": "Latitude (-90 ~ 90)",
     "locationLngPlaceholder": "Longitude (-180 ~ 180)",
     "locationLookingUp": "Resolving place name…",
-    "locationStatusSelected": "Location selected",
-    "locationStatusChoose": "Pick a point on the map",
     "locationZoomIn": "Zoom in",
     "locationZoomOut": "Zoom out",
     "extLocation": "Location",
@@ -188,7 +190,14 @@
     "unorderedList": "Unordered list",
     "codeBlock": "Code block",
     "addedLabel": "Added:",
-    "noContentAdded": "No content added yet"
+    "noContentAdded": "No content added yet",
+    "originalPhotoHint": "Original upload: preserves image quality, metadata and motion video. No compression or transcoding. Open the image to play motion or download the original.",
+    "locationSetupRequired": "Configure an AMap Web JS API key and security code in Panel → System settings first.",
+    "locationServiceError": "Location or map service unavailable. Check the AMap key, security code and allowed domain. Positioning also needs HTTPS and location permission. Try place search. Refresh after changing the key.",
+    "locationApproximateOnly": "Only an approximate city was found; it was not selected as your position. Enable precise location or search for a place.",
+    "locationSearchPlaceholder": "Enter a place name and city",
+    "locationSearch": "Search places",
+    "locationSearchEmpty": "No places found. Try including the city name."
   },
   "commentManager": {
     "tabSetting": "Comment Settings",
@@ -639,7 +648,12 @@
     "defaultLocale": "Default language",
     "logoUploading": "Uploading server logo...",
     "logoUploadSuccess": "Server logo uploaded successfully!",
-    "uploadFailed": "Upload failed, please try again later"
+    "uploadFailed": "Upload failed, please try again later",
+    "amapTitle": "Location and maps in China (AMap)",
+    "amapKey": "AMap Web JS API key",
+    "amapSecurityCode": "JS API security code (securityJsCode)",
+    "amapHint": "Create an AMap Web JS API application, enter its key and security code, configure allowed domains, then save and refresh. These values are for browser maps; do not enter private REST credentials.",
+    "amapApply": "Apply for an AMap key"
   },
   "storageSetting": {
     "title": "Object Storage Settings",
@@ -1115,7 +1129,14 @@
     "previewImage": "Preview image {index}",
     "prevImage": "Previous image",
     "nextImage": "Next image",
-    "goToImage": "Go to image {index}"
+    "goToImage": "Go to image {index}",
+    "downloadOriginal": "Download original",
+    "downloadingOriginal": "Downloading…",
+    "originalDownloadFailed": "Original download failed. Check the network; external or object-storage images require CORS access.",
+    "playMotion": "Play motion",
+    "showStill": "Show still",
+    "motionCodecUnsupported": "This browser cannot play the motion video. Download the original and open it in a compatible phone gallery.",
+    "stillUnsupported": "This still-image format is unsupported. Open it to play embedded motion or download the original."
   },
   "audioPlayer": {
     "unsupported": "Your browser does not support audio playback",
@@ -1150,7 +1171,7 @@
     "github": "GitHub",
     "website": "Website",
     "location": "Location",
-    "locationOpenInMaps": "Open in Google Maps",
+    "locationOpenInMaps": "Open in AMap",
     "jump": "Open",
     "tweet": "X Post",
     "tweetView": "View original post on X"

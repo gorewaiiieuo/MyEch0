@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2025-2026 lin-snow
 
+import type { PublicationTime } from '@/utils/publicationTime'
+
 export type LocationToAdd = {
   latitude: number | null
   longitude: number | null
@@ -27,6 +29,7 @@ export type EditorSession = { kind: 'compose' } | { kind: 'update'; echo: App.Ap
 
 export type EditorDraft = {
   savedAt: number
+  publicationTime?: PublicationTime
   echoToAdd: Pick<App.Api.Ech0.EchoToAdd, 'content' | 'private' | 'layout'>
   filesToAdd: App.Api.Ech0.FileToAdd[]
   websiteToAdd: WebsiteToAdd

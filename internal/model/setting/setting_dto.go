@@ -15,6 +15,8 @@ type SystemSettingDto struct {
 	FooterContent         string `json:"footer_content"`
 	FooterLink            string `json:"footer_link"`
 	MetingAPI             string `json:"meting_api"`
+	AMapKey               string `json:"amap_key"`
+	AMapSecurityCode      string `json:"amap_security_code"`
 	CustomCSS             string `json:"custom_css"`
 	CustomJS              string `json:"custom_js"`
 	PrivacyPolicy         string `json:"privacy_policy"`

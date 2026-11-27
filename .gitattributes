@@ -5,3 +5,6 @@ docs/** linguist-documentation
 # 忽略前端资源
 *.js linguist-language=Vue
 *.css linguist-language=Vue
+
+# NAS shell scripts must keep Unix line endings on Windows checkouts.
+*.sh text eol=lf

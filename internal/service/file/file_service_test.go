@@ -8,7 +8,9 @@ import (
 	"context"
 	"errors"
 	"image"
+	"image/jpeg"
 	"image/png"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -164,6 +166,38 @@ func (f *fileFix) uploadPNG(t *testing.T, filename string, w, h int) commonModel
 }
 
 func TestFileService_UploadFile(t *testing.T) {
+	t.Run("preserves original JPEG metadata and motion trailer byte for byte", func(t *testing.T) {
+		fix := newFileFix(t)
+		fix.expectAdmin()
+		var source bytes.Buffer
+		require.NoError(t, jpeg.Encode(&source, image.NewRGBA(image.Rect(0, 0, 16, 12)), nil))
+		content := append(source.Bytes(), []byte("EXIF_AND_VIVO_OPPO_EMBEDDED_VIDEO_TRAILER")...)
+		dto, err := fix.svc.UploadFile(fix.adminCtx(), makeFileHeader(t, "original-motion.jpg", content), storage.CategoryImage, storage.StorageTypeLocal)
+		require.NoError(t, err)
+		reader, err := fix.mgr.GetSelector().Get(context.Background(), storage.StorageTypeLocal, dto.Key)
+		require.NoError(t, err)
+		defer reader.Close()
+		stored, err := io.ReadAll(reader)
+		require.NoError(t, err)
+		require.Equal(t, content, stored)
+		require.Equal(t, int64(len(content)), dto.Size)
+	})
+
+	t.Run("accepts HEIC original with an embedded movie without converting it", func(t *testing.T) {
+		fix := newFileFix(t)
+		fix.expectAdmin()
+		content := append([]byte{0, 0, 0, 24, 'f', 't', 'y', 'p', 'h', 'e', 'i', 'c', 0, 0, 0, 0, 'm', 'i', 'f', '1', 'h', 'e', 'i', 'c'}, []byte("MOTION_VIDEO_BYTES")...)
+		dto, err := fix.svc.UploadFile(fix.adminCtx(), makeFileHeader(t, "original.heic", content), storage.CategoryImage, storage.StorageTypeLocal)
+		require.NoError(t, err)
+		require.Equal(t, "image/heic", dto.ContentType)
+		reader, err := fix.mgr.GetSelector().Get(context.Background(), storage.StorageTypeLocal, dto.Key)
+		require.NoError(t, err)
+		defer reader.Close()
+		stored, err := io.ReadAll(reader)
+		require.NoError(t, err)
+		require.Equal(t, content, stored)
+	})
+
 	t.Run("image success persists and resolves local url", func(t *testing.T) {
 		fix := newFileFix(t)
 		content := pngBytes(t, 12, 8)

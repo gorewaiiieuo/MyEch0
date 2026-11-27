@@ -15,18 +15,20 @@ const (
 )
 
 type SystemSetting struct {
-	SiteTitle     string `json:"site_title"`
-	ServerLogo    string `json:"server_logo"`
-	ServerName    string `json:"server_name"`
-	ServerURL     string `json:"server_url"`
-	AllowRegister bool   `json:"allow_register"`
-	DefaultLocale string `json:"default_locale"`
-	ICPNumber     string `json:"ICP_number"`
-	FooterContent string `json:"footer_content"`
-	FooterLink    string `json:"footer_link"`
-	MetingAPI     string `json:"meting_api"`
-	CustomCSS     string `json:"custom_css"`
-	CustomJS      string `json:"custom_js"`
+	SiteTitle        string `json:"site_title"`
+	ServerLogo       string `json:"server_logo"`
+	ServerName       string `json:"server_name"`
+	ServerURL        string `json:"server_url"`
+	AllowRegister    bool   `json:"allow_register"`
+	DefaultLocale    string `json:"default_locale"`
+	ICPNumber        string `json:"ICP_number"`
+	FooterContent    string `json:"footer_content"`
+	FooterLink       string `json:"footer_link"`
+	MetingAPI        string `json:"meting_api"`
+	AMapKey          string `json:"amap_key"`
+	AMapSecurityCode string `json:"amap_security_code"`
+	CustomCSS        string `json:"custom_css"`
+	CustomJS         string `json:"custom_js"`
 	// PrivacyPolicy is Markdown served on the public /privacy page. Empty means
 	// the page is not configured and answers 404.
 	PrivacyPolicy string `json:"privacy_policy"`

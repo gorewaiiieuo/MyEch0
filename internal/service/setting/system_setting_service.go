@@ -111,6 +111,8 @@ func (settingService *SettingService) UpdateSetting(
 		setting.FooterContent = newSetting.FooterContent
 		setting.FooterLink = urlUtil.TrimURL(newSetting.FooterLink)
 		setting.MetingAPI = urlUtil.TrimURL(newSetting.MetingAPI)
+		setting.AMapKey = strings.TrimSpace(newSetting.AMapKey)
+		setting.AMapSecurityCode = strings.TrimSpace(newSetting.AMapSecurityCode)
 		setting.CustomCSS = newSetting.CustomCSS
 		setting.CustomJS = newSetting.CustomJS
 		setting.PrivacyPolicy = newSetting.PrivacyPolicy

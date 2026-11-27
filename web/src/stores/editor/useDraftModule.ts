@@ -6,6 +6,7 @@ import { ImageLayout } from '@/enums/enums'
 import { localStg } from '@/utils/storage'
 import { theToast } from '@/utils/toast'
 import { useBaseDialog } from '@/composables/useBaseDialog'
+import type { PublicationTime } from '@/utils/publicationTime'
 import type {
   EditorDraft,
   ExtensionToAdd,
@@ -21,6 +22,7 @@ const EDITOR_DRAFT_SAVE_DEBOUNCE_MS = 600
 
 type DraftModuleDeps = {
   echoToAdd: Ref<App.Api.Ech0.EchoToAdd>
+  publicationTime: Ref<PublicationTime>
   filesToAdd: Ref<App.Api.Ech0.FileToAdd[]>
   websiteToAdd: Ref<WebsiteToAdd>
   videoURL: Ref<string>
@@ -38,6 +40,7 @@ type DraftModuleDeps = {
 export function useDraftModule(deps: DraftModuleDeps) {
   const {
     echoToAdd,
+    publicationTime,
     filesToAdd,
     websiteToAdd,
     videoURL,
@@ -99,6 +102,7 @@ export function useDraftModule(deps: DraftModuleDeps) {
 
     const draft: EditorDraft = {
       savedAt: Date.now(),
+      publicationTime: { ...publicationTime.value },
       echoToAdd: {
         content: echoToAdd.value.content || '',
         private: !!echoToAdd.value.private,
@@ -166,6 +170,13 @@ export function useDraftModule(deps: DraftModuleDeps) {
       onConfirm: () => {
         isRestoringDraft.value = true
         try {
+          publicationTime.value = {
+            useNow: draft.publicationTime?.useNow !== false,
+            localTime:
+              typeof draft.publicationTime?.localTime === 'string'
+                ? draft.publicationTime.localTime
+                : '',
+          }
           echoToAdd.value = {
             content: draft.echoToAdd?.content || '',
             private: !!draft.echoToAdd?.private,
@@ -215,6 +226,7 @@ export function useDraftModule(deps: DraftModuleDeps) {
     watch(
       [
         echoToAdd,
+        publicationTime,
         filesToAdd,
         websiteToAdd,
         videoURL,

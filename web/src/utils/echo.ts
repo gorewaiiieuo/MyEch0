@@ -12,6 +12,7 @@ type EchoLike = {
     file_id?: string
     file?: {
       id?: string
+      name?: string
       key?: string
       url?: string
       storage_type?: string
@@ -32,6 +33,7 @@ export function getEchoFiles(echo?: EchoLike | null): App.Api.Ech0.FileObject[] 
     const storageType = normalizeStorageType(file?.storage_type)
     return {
       id: String(file?.id || item.file_id || ''),
+      name: file?.name,
       echo_id: String(echo.id || item.echo_id || ''),
       url: String(file?.url || ''),
       storage_type: storageType,

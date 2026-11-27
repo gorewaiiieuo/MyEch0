@@ -2,6 +2,7 @@
 <!-- Copyright (C) 2025-2026 lin-snow -->
 <template>
   <button
+    ref="buttonEl"
     class="bg-transparent border-0 p-0 cursor-pointer"
     :class="buttonClass"
     type="button"
@@ -20,15 +21,35 @@
         class="echoimg transition-opacity duration-300"
         :class="[imgClass, loaded ? 'opacity-100' : 'opacity-0']"
         @load="$emit('load')"
-        @error="$emit('error')"
+        @error="handleImageError"
       />
+      <div v-if="failed" class="p-4 text-sm text-[var(--color-text-muted)]">
+        {{ t('imageGallery.stillUnsupported') }}
+      </div>
       <slot></slot>
     </div>
   </button>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { installInlineMotion } from '@/utils/pressMotion'
+import { theToast } from '@/utils/toast'
+
+const { t } = useI18n()
+const failed = ref(false)
+const buttonEl = ref<HTMLElement | null>(null)
+let releaseMotion: (() => void) | undefined
+const bindMotion = () => {
+  releaseMotion?.()
+  if (buttonEl.value)
+    releaseMotion = installInlineMotion(buttonEl.value, props.src, () =>
+      theToast.error(t('imageGallery.motionCodecUnsupported')),
+    )
+}
+onMounted(bindMotion)
+onBeforeUnmount(() => releaseMotion?.())
 
 const emit = defineEmits<{
   (e: 'click', sourceElement: HTMLElement | null): void
@@ -60,6 +81,17 @@ const props = withDefaults(
 )
 
 const effectiveLoading = computed(() => (props.priority ? 'eager' : props.loading))
+function handleImageError() {
+  failed.value = true
+  emit('error')
+}
+watch(
+  () => props.src,
+  () => {
+    failed.value = false
+    bindMotion()
+  },
+)
 
 const handleClick = (event: MouseEvent) => {
   const sourceElement = event.currentTarget

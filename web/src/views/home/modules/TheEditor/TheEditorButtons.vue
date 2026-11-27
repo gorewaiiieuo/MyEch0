@@ -16,6 +16,13 @@
         class="w-8 h-8 sm:w-9 sm:h-9 rounded-xs"
         :tooltip="t('editor.addImage')"
       />
+      <BaseButton
+        v-if="currentMode === Mode.ECH0"
+        :icon="MapPin"
+        @click="handleAddLocation"
+        class="w-8 h-8 sm:w-9 sm:h-9 rounded-xs"
+        :tooltip="t('editor.addLocation')"
+      />
       <div v-if="currentMode === Mode.ECH0" class="editor-actions__tag">
         <Popover>
           <PopoverButton
@@ -253,6 +260,11 @@ const handleAddMediaMode = () => {
 
 const handleExitUpdateMode = () => {
   editorStore.handleExitUpdateMode()
+}
+
+const handleAddLocation = () => {
+  extensionToAdd.value.extension_type = ExtensionType.LOCATION
+  editorStore.setMode(Mode.EXTEN)
 }
 
 const MAX_TAGS = 3

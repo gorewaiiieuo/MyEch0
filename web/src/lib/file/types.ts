@@ -57,6 +57,7 @@ export type UpdateFileMetaInput = {
 }
 
 export type FileAttachment = {
+  name?: string
   id?: string
   key?: string
   url: string

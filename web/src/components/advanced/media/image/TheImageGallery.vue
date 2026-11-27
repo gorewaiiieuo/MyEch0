@@ -109,6 +109,7 @@ const resolvedSrcs = computed(() =>
 const galleryItems = computed(() =>
   images.value.map((image, idx) => ({
     src: resolvedSrcs.value[idx] || '',
+    name: image.name,
     width: image.width,
     height: image.height,
     alt: getAlt(idx),

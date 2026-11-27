@@ -35,6 +35,13 @@
     "none": "なし"
   },
   "editor": {
+    "publicationTime": "投稿日時",
+    "publicationTimeNow": "現在",
+    "publicationTimeCustom": "日時を選択",
+    "publicationTimeNowHint": "送信時の現在時刻を使用します。",
+    "publicationTimeCustomHint": "現地のタイムゾーン {timezone} で保存され、この日時順に表示されます。",
+    "publicationTimeInvalid": "有効な投稿日時を選択してください。",
+    "publicationTimeFuture": "未来の日時は指定できません。",
     "tagPickerTooltip": "タグを選択",
     "tagPickerEmpty": "選択できるタグがありません",
     "tagPickerGoToManage": "タグ管理へ移動",
@@ -61,7 +68,6 @@
     "imageSourceLocal": "ローカル",
     "imageSourceObject": "S3",
     "imageLayout": "レイアウトを選択：",
-    "imageSmartCompress": "スマート圧縮：",
     "currentUploadMode": "現在の保存方式：",
     "uploadingSuffix": "、アップロード中...",
     "addMoreImages": "さらに追加",
@@ -116,20 +122,16 @@
     "addLocation": "位置情報を追加",
     "addTweet": "X 投稿を追加",
     "locationShare": "位置情報",
-    "locationHint": "地図をタップするか座標を入力",
+    "locationHint": "高徳地図で現在地を取得、地名を検索、または地図上で選択できます。携帯端末の測位には HTTPS と位置情報の許可が必要です。",
     "locationUseCurrent": "現在地を取得",
     "locationClear": "位置情報をクリア",
     "locationGeolocating": "取得中…",
-    "locationGeolocationDenied": "位置情報の許可が得られませんでした。地図から手動で選んでください",
-    "locationGeolocationUnsupported": "このブラウザは位置情報に対応していません",
     "locationCoordInvalid": "緯度・経度が有効範囲外です",
     "locationPlaceholderInput": "ここはどこ？",
     "locationPlaceholderRequired": "地名を入力してください",
     "locationLatPlaceholder": "緯度 (-90 ~ 90)",
     "locationLngPlaceholder": "経度 (-180 ~ 180)",
     "locationLookingUp": "地名を解決中…",
-    "locationStatusSelected": "選択済み",
-    "locationStatusChoose": "地図上で位置を選択",
     "locationZoomIn": "拡大",
     "locationZoomOut": "縮小",
     "extLocation": "位置情報",
@@ -188,7 +190,14 @@
     "unorderedList": "箇条書き",
     "codeBlock": "コードブロック",
     "addedLabel": "追加済み：",
-    "noContentAdded": "まだコンテンツが追加されていません"
+    "noContentAdded": "まだコンテンツが追加されていません",
+    "originalPhotoHint": "オリジナルでアップロード：画質・撮影情報・動画を保持し、圧縮や変換を行いません。拡大表示で動画再生や原本の保存ができます。",
+    "locationSetupRequired": "管理パネルのシステム設定に高徳地図の Web JS API Key とセキュリティコードを設定してください。",
+    "locationServiceError": "地図サービスを利用できません。Key・セキュリティコード・ドメインを確認してください。測位には HTTPS と位置情報の許可も必要です。地名検索をお試しください。Key 変更後は再読み込みしてください。",
+    "locationApproximateOnly": "大まかな都市のみ取得できたため現在地には設定していません。正確な位置情報を有効にするか地名を検索してください。",
+    "locationSearchPlaceholder": "地名と都市名を入力",
+    "locationSearch": "場所を検索",
+    "locationSearchEmpty": "場所が見つかりません。都市名も入力してください。"
   },
   "commentManager": {
     "tabSetting": "コメント設定",
@@ -639,7 +648,12 @@
     "defaultLocale": "既定の言語",
     "logoUploading": "サーバーロゴをアップロード中...",
     "logoUploadSuccess": "サーバーロゴをアップロードしました！",
-    "uploadFailed": "アップロードに失敗しました。しばらくしてから再試行してください"
+    "uploadFailed": "アップロードに失敗しました。しばらくしてから再試行してください",
+    "amapTitle": "中国国内の測位と地図（高徳）",
+    "amapKey": "高徳 Web JS API Key",
+    "amapSecurityCode": "JS API セキュリティコード（securityJsCode）",
+    "amapHint": "高徳で Web JS API アプリを作成し、Key とセキュリティコード、ドメインを設定して保存・再読み込みしてください。非公開の REST 認証情報は入力しないでください。",
+    "amapApply": "高徳の Key を申請"
   },
   "storageSetting": {
     "title": "オブジェクトストレージ設定",
@@ -1115,7 +1129,14 @@
     "previewImage": "画像 {index} をプレビュー",
     "prevImage": "前の画像",
     "nextImage": "次の画像",
-    "goToImage": "{index} 枚目の画像へ移動"
+    "goToImage": "{index} 枚目の画像へ移動",
+    "downloadOriginal": "原本を保存",
+    "downloadingOriginal": "保存中…",
+    "originalDownloadFailed": "保存できません。通信状態を確認してください。外部画像には CORS 設定が必要です。",
+    "playMotion": "動画を再生",
+    "showStill": "静止画を表示",
+    "motionCodecUnsupported": "この動画形式はブラウザで再生できません。原本を保存して対応するスマートフォンのアルバムで開いてください。",
+    "stillUnsupported": "この静止画形式は未対応です。開くと内蔵動画の再生や原本の保存ができます。"
   },
   "audioPlayer": {
     "unsupported": "お使いのブラウザは音声再生に対応していません",
@@ -1150,7 +1171,7 @@
     "github": "GitHub",
     "website": "ウェブサイト",
     "location": "位置情報",
-    "locationOpenInMaps": "Google マップで開く",
+    "locationOpenInMaps": "高徳地図で開く",
     "jump": "開く",
     "tweet": "X 投稿",
     "tweetView": "X で元の投稿を表示"

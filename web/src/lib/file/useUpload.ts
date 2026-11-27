@@ -10,7 +10,7 @@ import { theToast } from '@/utils/toast'
 import { formatBytes } from '@/utils/file'
 import { getImageSize } from '@/utils/image'
 import { getFileToAddUrl } from '@/utils/other'
-import { compressImage, inferFileExtFromType } from './compress'
+import { inferFileExtFromType } from './compress'
 import { getPresign, updateFileMeta } from './api/adapter'
 import { globalFileRegistry } from './registry/file-registry'
 import { httpUpload, UPLOAD_KIND } from './upload'
@@ -113,7 +113,10 @@ export function useUpload(opts: UseUploadOptions) {
   }
 
   function isAllowed(file: File): boolean {
-    return allowedTypes.some((rule) => mimeMatches(rule, file.type))
+    const imageWithoutMime = !file.type && /\.(jpe?g|png|gif|webp|avif|heic|heif)$/i.test(file.name)
+    return allowedTypes.some(
+      (rule) => mimeMatches(rule, file.type) || (rule === 'image/*' && imageWithoutMime),
+    )
   }
 
   function liveCount(): number {
@@ -243,17 +246,10 @@ export function useUpload(opts: UseUploadOptions) {
     item.abort = ctl
 
     try {
-      let working = item.file
-      if (opts.enableCompressor.value && working.type.startsWith('image/')) {
-        item.status = UPLOAD_STATUS.COMPRESSING
-        item.compressionAttempted = true
-        try {
-          working = await compressImage(working)
-          item.file = working
-        } catch (err) {
-          console.warn('[uploader] compression failed, using original file:', err)
-        }
-      }
+      // Always upload the exact selected bytes, including EXIF and embedded motion video.
+      // Ignore the legacy compression option so no caller can silently strip original data.
+      const working = item.originalFile
+      item.file = working
 
       if (ctl.signal.aborted) {
         item.status = UPLOAD_STATUS.CANCELLED
@@ -333,6 +329,7 @@ export function useUpload(opts: UseUploadOptions) {
     }
     return {
       id: fileId,
+      name: typeof payload.name === 'string' ? payload.name : file.name,
       url: fileUrl,
       storage_type: FILE_STORAGE_TYPE.LOCAL,
       key: fileKey,
@@ -349,7 +346,13 @@ export function useUpload(opts: UseUploadOptions) {
     item: QueueItem,
     signal: AbortSignal,
   ): Promise<App.Api.Ech0.FileToAdd> {
-    const contentType = file.type || 'application/octet-stream'
+    const contentType =
+      file.type ||
+      (/\.heic$/i.test(file.name)
+        ? 'image/heic'
+        : /\.heif$/i.test(file.name)
+          ? 'image/heif'
+          : 'application/octet-stream')
     const rawName = String(file.name || '').trim()
     const fileName = rawName || `upload_${Date.now()}${inferFileExtFromType(contentType)}`
 
@@ -409,6 +412,7 @@ export function useUpload(opts: UseUploadOptions) {
 
     return {
       id: presign.id,
+      name: file.name,
       url: presign.file_url,
       storage_type: FILE_STORAGE_TYPE.OBJECT,
       key: presign.key,

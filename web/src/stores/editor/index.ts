@@ -14,6 +14,12 @@ import {
 } from '@/utils/timeline'
 import { useEchoStore, useSettingStore } from '@/stores'
 import { getEchoFiles } from '@/utils/echo'
+import { timeValueToMs, timeValueToUnixSeconds } from '@/utils/timeValue'
+import {
+  formatLocalPublicationTime,
+  parseLocalPublicationTime,
+  type PublicationTime,
+} from '@/utils/publicationTime'
 import { localStg } from '@/utils/storage'
 import { globalFileRegistry } from '@/lib/file'
 import { i18n } from '@/locales'
@@ -41,6 +47,7 @@ export const useEditorStore = defineStore('editorStore', () => {
     layout: ImageLayout.WATERFALL,
   })
   const tagToAdd = ref<string[]>([])
+  const publicationTime = ref<PublicationTime>({ useNow: true, localTime: '' })
 
   const hasContent = computed(() => !!echoToAdd.value.content?.trim())
 
@@ -51,6 +58,7 @@ export const useEditorStore = defineStore('editorStore', () => {
   const files = useFilesModule({ t })
   const draft = useDraftModule({
     echoToAdd,
+    publicationTime,
     filesToAdd: files.filesToAdd,
     websiteToAdd: extension.websiteToAdd,
     videoURL: extension.videoURL,
@@ -99,6 +107,7 @@ export const useEditorStore = defineStore('editorStore', () => {
   }
 
   const clearEditor = () => {
+    publicationTime.value = { useNow: true, localTime: '' }
     const rememberedStorageType =
       localStg.getItem<App.Api.File.StorageType>('file_storage_type') ?? FILE_STORAGE_TYPE.LOCAL
 
@@ -126,6 +135,7 @@ export const useEditorStore = defineStore('editorStore', () => {
         continue
       }
       files.fileToAdd.value = {
+        name: file.name,
         id: file.id,
         url: file.url,
         storage_type: file.storage_type,
@@ -213,6 +223,24 @@ export const useEditorStore = defineStore('editorStore', () => {
 
       const payload = buildEchoPayload()
 
+      if (!justSyncFiles) {
+        if (!publicationTime.value.useNow) {
+          const createdAt = parseLocalPublicationTime(publicationTime.value.localTime)
+          if (createdAt === null) {
+            theToast.error(t('editor.publicationTimeInvalid'))
+            return
+          }
+          if (createdAt > Math.floor(Date.now() / 1000)) {
+            theToast.error(t('editor.publicationTimeFuture'))
+            return
+          }
+          payload.created_at = createdAt
+        } else if (isUpdateMode.value) {
+          payload.created_at = Math.floor(Date.now() / 1000)
+        }
+        // On a new post, omitting created_at lets the server set the actual submit time.
+      }
+
       if (isEchoPayloadEmpty(payload)) {
         const errMsg = isUpdateMode.value ? t('editor.updateEchoEmpty') : t('editor.addEchoEmpty')
         theToast.error(errMsg)
@@ -258,6 +286,10 @@ export const useEditorStore = defineStore('editorStore', () => {
               if (res.data) {
                 echoStore.replaceEcho(res.data)
               }
+              if (payload.created_at !== timeValueToUnixSeconds(target.created_at)) {
+                resetHomeTimelineState()
+                void echoStore.refreshEchos()
+              }
               clearEditor()
               session.value = { kind: 'compose' }
               setMode(Mode.ECH0)
@@ -284,6 +316,10 @@ export const useEditorStore = defineStore('editorStore', () => {
 
   const seedUpdateDraft = (echo: App.Api.Ech0.Echo) => {
     echoToAdd.value.content = echo.content || ''
+    publicationTime.value = {
+      useNow: false,
+      localTime: formatLocalPublicationTime(timeValueToMs(echo.created_at)),
+    }
 
     files.setFilesToAdd(
       getEchoFiles(echo).map((file) => ({
@@ -384,6 +420,8 @@ export const useEditorStore = defineStore('editorStore', () => {
     fileUploading: files.fileUploading,
 
     echoToAdd,
+
+    publicationTime,
 
     hasContent,
     hasFile: files.hasFile,

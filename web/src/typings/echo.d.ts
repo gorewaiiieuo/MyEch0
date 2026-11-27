@@ -72,6 +72,7 @@ declare namespace App {
       }
 
       type FileObject = {
+        name?: string
         id: string
         echo_id: string
         url: string
@@ -115,6 +116,7 @@ declare namespace App {
       }
 
       type FileToAdd = {
+        name?: string
         id?: string
         url: string
         storage_type: File.StorageType
@@ -135,6 +137,7 @@ declare namespace App {
 
       type EchoToAdd = {
         content: string
+        created_at?: number
         echo_files?: Array<{ file_id: string; sort_order: number }> | null
         tags?: TagToAdd[] | null
         layout?: string | null

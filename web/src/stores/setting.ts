@@ -38,6 +38,8 @@ export const useSettingStore = defineStore('settingStore', () => {
     footer_content: '',
     footer_link: '',
     meting_api: '',
+    amap_key: '',
+    amap_security_code: '',
     custom_css: '',
     custom_js: '',
     privacy_policy: '',

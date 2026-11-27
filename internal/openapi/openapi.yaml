@@ -2417,6 +2417,10 @@ components:
           type: string
         allow_register:
           type: boolean
+        amap_key:
+          type: string
+        amap_security_code:
+          type: string
         custom_css:
           type: string
         custom_js:
@@ -2451,6 +2455,10 @@ components:
           type: string
         allow_register:
           type: boolean
+        amap_key:
+          type: string
+        amap_security_code:
+          type: string
         custom_css:
           type: string
         custom_js:

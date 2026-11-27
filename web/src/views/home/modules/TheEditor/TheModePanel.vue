@@ -32,12 +32,6 @@
           @click="handleAddExtension(ExtensionType.WEBSITE)"
         />
         <BaseButton
-          :icon="MapPin"
-          class="w-7 h-7 rounded-xs"
-          :tooltip="t('editor.addLocation')"
-          @click="handleAddExtension(ExtensionType.LOCATION)"
-        />
-        <BaseButton
           :icon="XBrand"
           class="w-7 h-7 rounded-xs"
           :tooltip="t('editor.addTweet')"
@@ -53,7 +47,6 @@ import Weblink from '@/components/icons/weblink.vue'
 import Music from '@/components/icons/music.vue'
 import Video from '@/components/icons/video.vue'
 import Githubproj from '@/components/icons/githubproj.vue'
-import MapPin from '@/components/icons/mappin.vue'
 import XBrand from '@/components/icons/tweet.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 

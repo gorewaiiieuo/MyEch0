@@ -274,6 +274,8 @@ func defaultConfig() *AppConfig {
 				"image/gif",
 				"image/webp",
 				"image/avif",
+				"image/heic",
+				"image/heif",
 				"audio/mpeg",
 				"audio/flac",
 				"audio/wav",

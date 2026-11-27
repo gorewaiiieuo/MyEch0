@@ -120,6 +120,40 @@
 
       <LocationPicker class="mb-2" :lat-lng="pickerLatLng" @change="handleMapChange" />
 
+      <form class="flex items-center gap-2 mb-2" @submit.prevent="handleSearchPlaces">
+        <BaseInput
+          v-model="searchQuery"
+          :placeholder="t('editor.locationSearchPlaceholder')"
+          :aria-label="t('editor.locationSearchPlaceholder')"
+          class="flex-1 min-w-0"
+        />
+        <button
+          type="submit"
+          class="rounded-md px-3 py-2 text-sm border border-[var(--color-border-subtle)] cursor-pointer whitespace-nowrap shrink-0"
+          :disabled="searching || isGeolocating || !searchQuery.trim()"
+        >
+          {{ searching ? t('editor.locationLookingUp') : t('editor.locationSearch') }}
+        </button>
+      </form>
+      <p v-if="searchMessage" class="text-sm mb-2 text-[var(--color-text-muted)]" role="status">
+        {{ searchMessage }}
+      </p>
+      <ul
+        v-if="searchResults.length"
+        class="mb-2 max-h-48 overflow-auto border border-[var(--color-border-subtle)] rounded-md"
+      >
+        <li v-for="place in searchResults" :key="place.id">
+          <button
+            type="button"
+            class="w-full text-left px-3 py-2 cursor-pointer hover:bg-[var(--color-bg-muted)]"
+            @click="selectPlace(place)"
+          >
+            <span class="block font-medium">{{ place.name }}</span>
+            <span class="block text-xs text-[var(--color-text-muted)]">{{ place.address }}</span>
+          </button>
+        </li>
+      </ul>
+
       <div class="flex flex-wrap items-center gap-2 mb-2">
         <BaseButton
           class="rounded-md px-3 py-2 text-sm whitespace-nowrap"
@@ -169,13 +203,20 @@
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import LocationPicker from '@/components/advanced/extension/shared/LocationPicker.vue'
-import { useReverseGeocoding } from '@/components/advanced/extension/shared/useReverseGeocoding'
+import {
+  loadAMap,
+  locate,
+  reverseAddress,
+  searchPlaces,
+  type Place,
+  type Coordinate,
+} from '@/utils/amap'
 import { ExtensionType, MusicProvider } from '@/enums/enums'
 import { parseMusicURL, extractAndCleanMusicURL } from '@/utils/other'
 import { parseTweetUrl } from '@/utils/tweet'
 import { useEditorStore, useSettingStore } from '@/stores'
 import { storeToRefs } from 'pinia'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchGetWebsiteTitle } from '@/service/api'
 import { theToast } from '@/utils/toast'
@@ -207,6 +248,57 @@ function goToSystemSetting() {
 const parsedTweet = computed(() => parseTweetUrl(editorStore.tweetToAdd.url))
 
 const isGeolocating = ref(false)
+const isFetchingGeocoding = ref(false)
+const searchQuery = ref('')
+const searching = ref(false)
+const searchResults = ref<Place[]>([])
+const searchMessage = ref('')
+let locationRequest = 0
+let searchRequest = 0
+let disposed = false
+onBeforeUnmount(() => {
+  disposed = true
+  locationRequest++
+  searchRequest++
+})
+const getMapSDK = () =>
+  loadAMap(SystemSetting.value.amap_key || '', SystemSetting.value.amap_security_code || '')
+
+function locationError(error: unknown) {
+  if (!SystemSetting.value.amap_key) return t('editor.locationSetupRequired')
+  if (error instanceof Error && error.message === 'AMAP_APPROXIMATE_ONLY')
+    return t('editor.locationApproximateOnly')
+  return t('editor.locationServiceError')
+}
+
+async function handleSearchPlaces() {
+  const query = searchQuery.value.trim()
+  if (!query) return
+  const request = ++searchRequest
+  searching.value = true
+  searchResults.value = []
+  searchMessage.value = ''
+  const center = pickerLatLng.value
+  try {
+    const results = await searchPlaces(await getMapSDK(), query, center)
+    if (disposed || request !== searchRequest) return
+    searchResults.value = results
+    if (!results.length) searchMessage.value = t('editor.locationSearchEmpty')
+  } catch (error) {
+    if (!disposed && request === searchRequest) searchMessage.value = locationError(error)
+  } finally {
+    if (request === searchRequest) searching.value = false
+  }
+}
+
+function selectPlace(place: Place) {
+  locationRequest++
+  isFetchingGeocoding.value = false
+  editorStore.locationToAdd.latitude = place.position.lat
+  editorStore.locationToAdd.longitude = place.position.lng
+  editorStore.locationToAdd.placeholder = [place.name, place.address].filter(Boolean).join(' · ')
+  searchResults.value = []
+}
 
 const latInput = computed<number | null>({
   get: () => editorStore.locationToAdd.latitude,
@@ -235,19 +327,36 @@ const pickerLatLng = computed(() => {
   return { lat: latitude, lng: longitude }
 })
 
-const latRef = computed(() => editorStore.locationToAdd.latitude)
-const lngRef = computed(() => editorStore.locationToAdd.longitude)
-const { displayName, isFetching: isFetchingGeocoding } = useReverseGeocoding(latRef, lngRef)
-
-watch(displayName, (name) => {
-  if (!name) return
-  if (editorStore.extensionToAdd.extension_type !== ExtensionType.LOCATION) return
-  editorStore.locationToAdd.placeholder = name
+watch(pickerLatLng, () => {
+  // Results requested for an old location must not replace the new location's results.
+  searchRequest++
+  searching.value = false
+  searchResults.value = []
+  searchMessage.value = ''
 })
 
-function handleMapChange(p: { lat: number; lng: number }) {
+async function handleMapChange(p: Coordinate) {
+  const request = ++locationRequest
   editorStore.locationToAdd.latitude = p.lat
   editorStore.locationToAdd.longitude = p.lng
+  const oldName = editorStore.locationToAdd.placeholder
+  isFetchingGeocoding.value = true
+  try {
+    const name = await reverseAddress(await getMapSDK(), p)
+    if (
+      !disposed &&
+      request === locationRequest &&
+      name &&
+      editorStore.locationToAdd.latitude === p.lat &&
+      editorStore.locationToAdd.longitude === p.lng &&
+      editorStore.locationToAdd.placeholder === oldName
+    )
+      editorStore.locationToAdd.placeholder = name
+  } catch {
+    // Coordinates remain selectable even when reverse geocoding is unavailable.
+  } finally {
+    if (request === locationRequest) isFetchingGeocoding.value = false
+  }
 }
 
 const hasLocationSelected = computed(
@@ -258,29 +367,27 @@ const hasLocationSelected = computed(
 )
 
 function handleClearLocation() {
+  locationRequest++
+  isFetchingGeocoding.value = false
   editorStore.locationToAdd.latitude = null
   editorStore.locationToAdd.longitude = null
   editorStore.locationToAdd.placeholder = ''
 }
 
-function handleUseCurrentLocation() {
-  if (!('geolocation' in navigator)) {
-    theToast.error(String(t('editor.locationGeolocationUnsupported')))
-    return
-  }
+async function handleUseCurrentLocation() {
+  const request = ++locationRequest
   isGeolocating.value = true
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      editorStore.locationToAdd.latitude = pos.coords.latitude
-      editorStore.locationToAdd.longitude = pos.coords.longitude
-      isGeolocating.value = false
-    },
-    () => {
-      isGeolocating.value = false
-      theToast.error(String(t('editor.locationGeolocationDenied')))
-    },
-    { enableHighAccuracy: true, timeout: 8000 },
-  )
+  try {
+    const result = await locate(await getMapSDK())
+    if (disposed || request !== locationRequest) return
+    editorStore.locationToAdd.latitude = result.position.lat
+    editorStore.locationToAdd.longitude = result.position.lng
+    editorStore.locationToAdd.placeholder = result.name
+  } catch (error) {
+    if (!disposed && request === locationRequest) theToast.error(String(locationError(error)))
+  } finally {
+    isGeolocating.value = false
+  }
 }
 
 const handleFetchWebsiteTitle = async () => {

@@ -1,0 +1,12 @@
+.git/
+.pnpm-store/
+**/node_modules/
+backend-artifacts/
+template/dist/
+**/data/
+**/backups/
+**/.env
+**/.env.*
+*.log
+test-output/
+deploy/nas/.update.lock/

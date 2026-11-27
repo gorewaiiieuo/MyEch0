@@ -35,6 +35,13 @@
     "none": "Keine"
   },
   "editor": {
+    "publicationTime": "Veröffentlichungszeit",
+    "publicationTimeNow": "Jetzt",
+    "publicationTimeCustom": "Zeit auswählen",
+    "publicationTimeNowHint": "Beim Absenden wird die aktuelle Zeit verwendet.",
+    "publicationTimeCustomHint": "Gespeichert in Ihrer lokalen Zeitzone {timezone}. Beiträge werden nach dieser Zeit sortiert.",
+    "publicationTimeInvalid": "Bitte wählen Sie eine gültige Veröffentlichungszeit.",
+    "publicationTimeFuture": "Die Veröffentlichungszeit darf nicht in der Zukunft liegen.",
     "tagPickerTooltip": "Tags auswählen",
     "tagPickerEmpty": "Noch keine Tags verfügbar",
     "tagPickerGoToManage": "Zur Tag-Verwaltung",
@@ -61,7 +68,6 @@
     "imageSourceLocal": "Lokal",
     "imageSourceObject": "S3",
     "imageLayout": "Layout wählen:",
-    "imageSmartCompress": "Intelligente Komprimierung:",
     "currentUploadMode": "Aktuelle Speicherart:",
     "uploadingSuffix": ", wird hochgeladen…",
     "addMoreImages": "Weitere Anhänge hinzufügen",
@@ -116,20 +122,16 @@
     "addLocation": "Ort hinzufügen",
     "addTweet": "X-Beitrag hinzufügen",
     "locationShare": "Ort",
-    "locationHint": "Klicke auf die Karte oder gib Koordinaten ein",
+    "locationHint": "Mit AMap orten, Orte suchen oder auf der Karte wählen. Mobile Ortung benötigt HTTPS und eine Standortfreigabe.",
     "locationUseCurrent": "Aktuellen Ort verwenden",
     "locationClear": "Ort löschen",
     "locationGeolocating": "Ortung läuft…",
-    "locationGeolocationDenied": "Ortung abgelehnt. Bitte wähle einen Punkt auf der Karte.",
-    "locationGeolocationUnsupported": "Dein Browser unterstützt keine Ortung",
     "locationCoordInvalid": "Koordinaten außerhalb des gültigen Bereichs",
     "locationPlaceholderInput": "Wo ist das?",
     "locationPlaceholderRequired": "Bitte Ortsnamen angeben",
     "locationLatPlaceholder": "Breite (-90 ~ 90)",
     "locationLngPlaceholder": "Länge (-180 ~ 180)",
     "locationLookingUp": "Ortsname wird ermittelt…",
-    "locationStatusSelected": "Ort ausgewählt",
-    "locationStatusChoose": "Wähle einen Punkt auf der Karte",
     "locationZoomIn": "Vergrößern",
     "locationZoomOut": "Verkleinern",
     "extLocation": "Ort",
@@ -188,7 +190,14 @@
     "unorderedList": "Aufzählung",
     "codeBlock": "Codeblock",
     "addedLabel": "Hinzugefügt:",
-    "noContentAdded": "Noch keine Inhalte hinzugefügt"
+    "noContentAdded": "Noch keine Inhalte hinzugefügt",
+    "originalPhotoHint": "Original-Upload: Bildqualität, Metadaten und Bewegungsvideo bleiben erhalten. Keine Komprimierung oder Umwandlung. Großansicht zum Abspielen oder Herunterladen öffnen.",
+    "locationSetupRequired": "Zuerst einen AMap Web JS API-Schlüssel und Sicherheitscode in den Systemeinstellungen eintragen.",
+    "locationServiceError": "Kartendienst nicht verfügbar. AMap-Schlüssel, Sicherheitscode und Domain prüfen. Ortung benötigt HTTPS und Standortfreigabe. Ortssuche versuchen; nach Schlüsseländerung neu laden.",
+    "locationApproximateOnly": "Nur eine ungefähre Stadt gefunden; sie wurde nicht als Standort übernommen. Präzise Ortung aktivieren oder einen Ort suchen.",
+    "locationSearchPlaceholder": "Ortsname und Stadt eingeben",
+    "locationSearch": "Ort suchen",
+    "locationSearchEmpty": "Keine Orte gefunden. Den Stadtnamen hinzufügen."
   },
   "commentManager": {
     "tabSetting": "Kommentar-Einstellungen",
@@ -639,7 +648,12 @@
     "defaultLocale": "Standardsprache",
     "logoUploading": "Server-Logo wird hochgeladen…",
     "logoUploadSuccess": "Server-Logo hochgeladen!",
-    "uploadFailed": "Upload fehlgeschlagen, bitte später erneut versuchen"
+    "uploadFailed": "Upload fehlgeschlagen, bitte später erneut versuchen",
+    "amapTitle": "Standort und Karten in China (AMap)",
+    "amapKey": "AMap Web JS API-Schlüssel",
+    "amapSecurityCode": "JS API-Sicherheitscode (securityJsCode)",
+    "amapHint": "Eine AMap Web JS API-Anwendung erstellen, Schlüssel und Sicherheitscode eintragen, Domains konfigurieren, speichern und neu laden. Keine privaten REST-Zugangsdaten eintragen.",
+    "amapApply": "AMap-Schlüssel beantragen"
   },
   "storageSetting": {
     "title": "Objektspeicher-Einstellungen",
@@ -1115,7 +1129,14 @@
     "previewImage": "Bild {index} anzeigen",
     "prevImage": "Vorheriges Bild",
     "nextImage": "Nächstes Bild",
-    "goToImage": "Zu Bild {index} springen"
+    "goToImage": "Zu Bild {index} springen",
+    "downloadOriginal": "Original laden",
+    "downloadingOriginal": "Wird geladen…",
+    "originalDownloadFailed": "Download fehlgeschlagen. Netzwerk und CORS-Freigabe externer Bilder prüfen.",
+    "playMotion": "Bewegung abspielen",
+    "showStill": "Standbild anzeigen",
+    "motionCodecUnsupported": "Dieses Video wird im Browser nicht unterstützt. Das Original in einer kompatiblen Smartphone-Galerie öffnen.",
+    "stillUnsupported": "Standbildformat nicht unterstützt. Zum Abspielen des Videos oder Herunterladen des Originals öffnen."
   },
   "audioPlayer": {
     "unsupported": "Ihr Browser unterstützt keine Audiowiedergabe",
@@ -1150,7 +1171,7 @@
     "github": "GitHub",
     "website": "Webseite",
     "location": "Ort",
-    "locationOpenInMaps": "In Google Maps öffnen",
+    "locationOpenInMaps": "In AMap öffnen",
     "jump": "Öffnen",
     "tweet": "X-Beitrag",
     "tweetView": "Original-Beitrag auf X ansehen"

@@ -4,12 +4,14 @@
 import { onBeforeUnmount, shallowRef, type Ref } from 'vue'
 import PhotoSwipe from 'photoswipe'
 import 'photoswipe/style.css'
+import { installOriginalPhotoControls } from './originalPhotoControls'
 
 type PhotoSwipeItem = {
   src: string
   width?: number
   height?: number
   alt?: string
+  name?: string
 }
 
 type ResolvedDimensions = {
@@ -137,8 +139,8 @@ export const usePhotoSwipeGallery = (items: Ref<PhotoSwipeItem[]>) => {
         const resolved = resolvedDimensions[index] || {}
         const baseItem = {
           src: item.src,
-          width: resolved.width,
-          height: resolved.height,
+          width: resolved.width || 1600,
+          height: resolved.height || 1200,
           alt: item.alt,
         }
 
@@ -189,6 +191,7 @@ export const usePhotoSwipeGallery = (items: Ref<PhotoSwipeItem[]>) => {
       }
 
       instance.value = pswp
+      installOriginalPhotoControls(pswp, items.value)
       pswp.init()
     })()
   }

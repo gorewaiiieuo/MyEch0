@@ -1050,6 +1050,8 @@ var safeExtMIME = map[string][]string{
 	".gif":  {"image/gif"},
 	".webp": {"image/webp"},
 	".avif": {"image/avif"},
+	".heic": {"image/heic", "image/heif"},
+	".heif": {"image/heif", "image/heic"},
 	".mp3":  {"audio/mpeg"},
 	".flac": {"audio/flac"},
 	".wav":  {"audio/wav", "audio/x-wav"},
@@ -1077,6 +1079,16 @@ func detectContentType(f multipart.File) (string, error) {
 	}
 	if _, err := f.Seek(0, io.SeekStart); err != nil {
 		return "", err
+	}
+	// net/http does not identify HEIF. Inspect its primary ISO-BMFF brand;
+	// preserve the entire stream, including any appended motion video.
+	if n >= 16 && string(buf[4:8]) == "ftyp" {
+		switch string(buf[8:12]) {
+		case "heic", "heix", "hevc", "hevx":
+			return "image/heic", nil
+		case "mif1", "msf1":
+			return "image/heif", nil
+		}
 	}
 	return http.DetectContentType(buf[:n]), nil
 }

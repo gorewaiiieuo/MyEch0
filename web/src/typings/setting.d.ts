@@ -16,6 +16,8 @@ declare namespace App {
         footer_content: string
         footer_link: string
         meting_api: string
+        amap_key?: string
+        amap_security_code?: string
         custom_css: string
         custom_js: string
         privacy_policy: string

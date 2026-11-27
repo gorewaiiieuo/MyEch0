@@ -58,10 +58,9 @@
         effectiveCategory === FILE_CATEGORY.IMAGE &&
         fileToAdd.storage_type !== FILE_STORAGE_TYPE.EXTERNAL
       "
-      class="mb-3 flex items-center"
+      class="mb-3 text-sm text-[var(--color-text-muted)]"
     >
-      <span class="text-[var(--color-text-secondary)]">{{ t('editor.imageSmartCompress') }}</span>
-      <BaseSwitch v-model="enableCompressor" />
+      {{ t('editor.originalPhotoHint') }}
     </div>
 
     <div class="text-[var(--color-text-muted)] text-sm mb-2">
@@ -85,7 +84,7 @@
         :fileStorageType="fileToAdd.storage_type"
         :fileCategory="effectiveCategory"
         :allowedFileTypes="acceptedTypes"
-        :EnableCompressor="enableCompressor && effectiveCategory === FILE_CATEGORY.IMAGE"
+        :EnableCompressor="false"
         :maxFileSize="maxFileSize"
         :maxFiles="maxFiles"
       />
@@ -119,7 +118,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useEditorStore, useSettingStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import { ImageLayout } from '@/enums/enums'
@@ -131,7 +130,6 @@ import Addmore from '@/components/icons/addmore.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseSegmented from '@/components/common/BaseSegmented.vue'
 import BaseSelect from '@/components/common/BaseSelect.vue'
-import BaseSwitch from '@/components/common/BaseSwitch.vue'
 import BaseInput from '@/components/common/BaseInput.vue'
 import TheUploader from '@/components/advanced/TheUploader.vue'
 import { localStg } from '@/utils/storage'
@@ -153,7 +151,6 @@ const singleClipFull = computed(
 )
 const settingStore = useSettingStore()
 const { S3Setting } = storeToRefs(settingStore)
-const enableCompressor = ref<boolean>(false)
 const { t } = useI18n()
 
 const handleSetFileSource = (source: App.Api.File.StorageType) => {

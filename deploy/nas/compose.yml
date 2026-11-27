@@ -1,0 +1,26 @@
+name: myech0
+
+services:
+  ech0:
+    image: ${ECH0_IMAGE:-yubaodocker1125/myech0:latest}
+    container_name: ${ECH0_CONTAINER_NAME:-ech0}
+    restart: unless-stopped
+    ports:
+      - "${ECH0_BIND_IP:-0.0.0.0}:${ECH0_PORT:-6277}:6277"
+    volumes:
+      - type: bind
+        source: ${ECH0_DATA_DIR:?Set ECH0_DATA_DIR to the existing absolute data directory}
+        target: /app/data
+        bind:
+          create_host_path: false
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:6277/api/init/status"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

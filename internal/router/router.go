@@ -4,6 +4,10 @@
 package router
 
 import (
+	"mime"
+	"path"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/lin-snow/ech0/internal/config"
 	"github.com/lin-snow/ech0/internal/handler"
@@ -64,7 +68,17 @@ func setupStaticFiles(r *gin.Engine) {
 // schema's category directories are served; directories themselves and any
 // other path under the root answer 404.
 func registerStaticFiles(r *gin.Engine, root string) {
-	r.Group("api/files", middleware.StaticFileSecurity()).StaticFS("/", storage.NewPublicFS(root))
+	r.Group("api/files", middleware.StaticFileSecurity(), func(ctx *gin.Context) {
+		if ctx.Query("download") == "1" {
+			name := path.Base(strings.ReplaceAll(ctx.Query("filename"), "\\", "/"))
+			if name == "." || name == "/" || name == "" {
+				name = path.Base(ctx.Request.URL.Path)
+			}
+			ctx.Header("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": name}))
+			ctx.Header("Cache-Control", "private, no-store")
+		}
+		ctx.Next()
+	}).StaticFS("/", storage.NewPublicFS(root))
 }
 
 func revokerOf(mwDeps *middleware.Deps) authService.TokenRevoker {

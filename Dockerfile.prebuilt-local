@@ -1,0 +1,6 @@
+FROM sn0wl1n/ech0@sha256:ff35b895353e35f018dec0abccc6516a8b49ee4ce4d166067182a74a307fbb1b
+ARG BUILD_COMMIT=local
+LABEL org.opencontainers.image.source="https://github.com/gorewaiiieuo/MyEch0" \
+      org.opencontainers.image.licenses="AGPL-3.0-or-later" \
+      org.opencontainers.image.revision="${BUILD_COMMIT}"
+COPY --chown=10001:10001 --chmod=0755 backend-artifacts/ech0-linux-amd64 /app/ech0

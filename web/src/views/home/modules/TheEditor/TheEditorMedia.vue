@@ -73,6 +73,7 @@ const { filesToAdd, isUpdateMode, mediaCategory } = storeToRefs(editorStore)
 const previewItems = computed(() =>
   filesToAdd.value.map((image, idx) => ({
     src: getImageToAddUrl(image),
+    name: image.name,
     width: image.width,
     height: image.height,
     alt: t('imageGallery.previewImage', { index: idx + 1 }),
